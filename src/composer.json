@@ -1,0 +1,21 @@
+{
+  "name": "ymakhloufi/lemp_docker",
+  "description": "LEMP Docker Dev-Env",
+  "type": "project",
+  "require": {
+    "php": "7.4.*",
+    "doctrine/dbal": "^3.1",
+    "illuminate/support": "^8.40"
+  },
+  "authors": [
+    {
+      "name": "Yassin Makhloufi",
+      "email": "yassin@makhloufi.de"
+    }
+  ],
+  "config": {
+    "platform": {
+      "php": "7.4"
+    }
+  }
+}
