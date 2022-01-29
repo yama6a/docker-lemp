@@ -74,7 +74,7 @@ services:
     networks:
       - lemp_net
 
-# ToDo: consider using 5-fpm-alpine image and reuse existing nginx container to reduce mem footprint of this project
+  # ToDo: consider using 5-fpm-alpine image and reuse existing nginx container to reduce mem footprint of this project
   phpmyadmin_mysql:
     image: phpmyadmin/phpmyadmin:5
     container_name: lemp_container_phpMyAdmin_MySQL
@@ -90,6 +90,8 @@ services:
     networks:
       - lemp_net
 
+  # ToDo: consider using the same PMA instance for both mariadb and mysql by adding custom config for credentials:
+  #       https://hub.docker.com/r/phpmyadmin/phpmyadmin/
   phpmyadmin_mariadb:
     image: phpmyadmin/phpmyadmin:5
     container_name: lemp_container_phpMyAdmin_MariaDB

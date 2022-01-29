@@ -1,7 +1,8 @@
-Demo Project
+Lightweight LEMP dev-setup
 
 Containerized environment consisting of the following containers:
 ( All versions can be easily adapted! )
+
 - NGinX
 - PHP-FPM v8.0
 - MariaDB v10   
@@ -12,6 +13,7 @@ Containerized environment consisting of the following containers:
 ![Container Architecture](docs/architecture.jpg)
 
 ### Using the Makefile
+
 For simplicity's sake, we have added a small wrapper around Make. This allows us to pass arguments and flags to the 
 respective commands the idiomatic way. If you don't like using `./make` instead of just `make`, you can add this 
 one-liner to your `.bashrc` or `.bash_profile`:
@@ -20,6 +22,7 @@ function make(){ if [ -f ./make ]; then ./make $@; else make $@; fi }
 ```
 
 ### Set Up
+
 1. Ensure [Docker is installed](https://www.docker.com/products/docker-desktop) on your machine
 2. Run `./make up`
 3. The first installation can take about a minute or two (ymmv depending on network and CPU power)
@@ -31,16 +34,19 @@ function make(){ if [ -f ./make ]; then ./make $@; else make $@; fi }
    - `.docker/mariadb/docker-entrypoint-initdb.d`
    
 ### Changing the PHP version
+
 To change the PHP version, update the image tag in the `.docker/php-fpm/Dockerfile` as well the one for composer
 in the `.docker/docker-compose.yml`. Both need to match the same version, otherwise composer could behave quite
 oddly at times! After changing the version, you need to run `./make dc up --build` to ensure the php-fpm container
 is updated.
+
 - update line 1 of file `.docker/php-fpm/Dockerfile`, e.g. `FROM php:8.0-fpm` --> `FROM php:8.1-fpm`
 - update composer image-tag in file `.docker/docker-compose.yml`, e.g. `prooph/composer:8.0` --> `prooph/composer:8.1`
 - stop containers if not already done: `./make dc stop`
 - rebuild php-fpm container `./make dc up --build`
 
 ### Working with this setup
+
 1. If you need to run composer commands, you can run them through the composer-container to ensure not to run
    into php-version-conflicts in case you have a different PHP version on your host machine
    (avoiding "But it works on my machine!" problems). This can be done like so:
@@ -65,3 +71,11 @@ is updated.
    To wipe the DBs, use the command `./make wipe_db`.
 7. For a really fresh install, stop and remove all containers, db persistence, composer dependencies and env variables
    using the `./make clean` command followed by a fresh `./make up`.
+
+### Interfaces
+By default, the following ports/URIs are assigned to the respective services:
+
+- NginX: http://localhost:55001
+- PHP-FPM: 9000
+- MySQL: 55002 (PhpMyAdmin: http://localhost:55003)
+- MariaDB: 55004 (PhpMyAdmin: http://localhost:55005)
