@@ -10,5 +10,5 @@ print getResults([
     'password' => $_ENV['MYSQL_PASSWORD'] ?? null,
     'user'     => $_ENV['MYSQL_USER'] ?? null,
     'host'     => $_ENV['MYSQL_HOST'] ?? null,
-    'driver'   => 'pdo_mysql',
+    'driver'   => 'mysqli',
 ]);

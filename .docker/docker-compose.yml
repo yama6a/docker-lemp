@@ -10,8 +10,8 @@ services:
     ports:
       - "${NGINX_PORT}:80"
     volumes:
-      - ./src:/code
-      - .docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      - ../src:/code
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - php-fpm
     networks:
@@ -21,16 +21,16 @@ services:
     image: mariadb:10
     container_name: lemp_container_mariadb
     volumes:
-      - .docker/mariadb/db_persistence:/var/lib/mysql:rw
-      - .docker/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./mariadb/db_persistence:/var/lib/mysql:rw
+      - ./mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - "${MARIADB_PORT}:3306"
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "no"
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MARIADB_DATABASE}
+      MYSQL_USER: ${MARIADB_USER}
+      MYSQL_PASSWORD: ${MARIADB_PASSWORD}
     depends_on:
       - nginx
     networks:
@@ -40,8 +40,8 @@ services:
     image: mysql:8
     container_name: lemp_container_mysql
     volumes:
-      - .docker/mysql/db_persistence:/var/lib/mysql:rw
-      - .docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./mysql/db_persistence:/var/lib/mysql:rw
+      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - "${MYSQL_PORT}:3306"
     environment:
@@ -57,43 +57,61 @@ services:
 
   php-fpm:
     build:
-      dockerfile: .docker/php-fpm/Dockerfile
+      dockerfile: ./php-fpm/Dockerfile
       context: .
     container_name: lemp_container_php_fpm
     volumes:
-      - ./src:/code
+      - ../src:/code
     environment:
       MYSQL_HOST: mysql
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
       MARIADB_HOST: mariadb
     networks:
       - lemp_net
 
-  phpmyadmin:
+# ToDo: consider using 5-fpm-alpine image and reuse existing nginx container to reduce mem footprint of this project
+  phpmyadmin_mysql:
     image: phpmyadmin/phpmyadmin:5
-    container_name: lemp_container_phpMyAdmin
+    container_name: lemp_container_phpMyAdmin_MySQL
     ports:
-      - "${PMA_PORT}:80"
+      - "${MYSQL_PMA_PORT}:80"
     environment:
       PMA_ARBITRARY: 0
-      PMA_HOSTS: mysql,mariadb
+      PMA_HOSTS: mysql
       PMA_USER: ${MYSQL_USER}
       PMA_PASSWORD: ${MYSQL_PASSWORD}
     depends_on:
-      - mariadb
       - mysql
     networks:
       - lemp_net
 
+  phpmyadmin_mariadb:
+    image: phpmyadmin/phpmyadmin:5
+    container_name: lemp_container_phpMyAdmin_MariaDB
+    ports:
+      - "${MARIADB_PMA_PORT}:80"
+    environment:
+      PMA_ARBITRARY: 0
+      PMA_HOSTS: mariadb
+      PMA_USER: ${MARIADB_USER}
+      PMA_PASSWORD: ${MARIADB_PASSWORD}
+    depends_on:
+      - mariadb
+    networks:
+      - lemp_net
+
   composer:
-    image: prooph/composer:7.4 # remember that this version needs to match the php-fpm image-version!
+    image: prooph/composer:8.0 # remember that this version needs to match the php-fpm image-version!
     container_name: lemp_container_composer
     restart: 'no'
     command: "install"
     volumes:
-      - ./src:/app
+      - ../src:/app
     networks:
       - lemp_net
 
