@@ -6,9 +6,9 @@ require_once 'vendor/autoload.php';
 require_once 'results.php';
 
 print getResults([
-    'dbname'   => $_ENV['MYSQL_DATABASE'] ?? null,
-    'password' => $_ENV['MYSQL_PASSWORD'] ?? null,
-    'user'     => $_ENV['MYSQL_USER'] ?? null,
+    'dbname'   => $_ENV['MARIADB_DATABASE'] ?? null,
+    'password' => $_ENV['MARIADB_PASSWORD'] ?? null,
+    'user'     => $_ENV['MARIADB_USER'] ?? null,
     'host'     => $_ENV['MARIADB_HOST'] ?? null,
     'driver'   => 'pdo_mysql',
 ]);
