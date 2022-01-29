@@ -18,6 +18,5 @@
     include 'mysql.php'
     ?>
 </p>
-<p><a href="mariadb.php">MariaDB Test Page</a></p>
 </body>
 </html>
