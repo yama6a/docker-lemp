@@ -9,3 +9,5 @@
 4. Turn into Cookiecutter template
    1. Allow choosing DB
    2. Allow choosing PHP version
+5. Add linters as github-workflows
+6. Decide on infrastructure setup and IAC technology
