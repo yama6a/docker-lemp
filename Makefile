@@ -3,6 +3,7 @@ GREEN='\033[0;32m'
 BOLD='\033[1m'
 NC='\033[0m'
 COMPOSE_CMD:= docker-compose -f .docker/docker-compose.yml --env-file .env
+PROJECT_NAME=lemp
 
 .PHONY: help
 help:
@@ -42,8 +43,8 @@ wipe_db: down
 	@read -p "This will wipe your local databases. Continue? [y/N] " -n 1 REPLY ;\
 	echo "" ;\
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		docker volume rm lemp_phpmyadmin-html ;\
-		docker volume rm lemp_mysql-persistence ;\
+		docker volume rm $(PROJECT_NAME)_phpmyadmin-html ;\
+		docker volume rm $(PROJECT_NAME)_mysql-persistence ;\
 		echo "Your databases have been wiped." ;\
 		\
 		test -f .env \
