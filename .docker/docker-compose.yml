@@ -45,6 +45,7 @@ services:
     container_name: lemp_container_mysql
     volumes:
       - ./mysql/db_persistence:/var/lib/mysql:rw
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro  # remove to disable memory optimization (see .docker/mysql/my.cnf)
       - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - "${MYSQL_PORT}:3306"
