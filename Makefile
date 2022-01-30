@@ -42,14 +42,18 @@ wipe_db: down
 	@read -p "This will wipe your local databases. Continue? [y/N] " -n 1 REPLY ;\
 	echo "" ;\
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		rm -fr .docker/mysql/db_persistence/* ;\
-		rm -fr .docker/mariadb/db_persistence/* ;\
+		docker volume rm lemp_phpmyadmin-html ;\
+		docker volume rm lemp_mysql-persistence ;\
 		echo "Your databases have been wiped." ;\
 		\
-		test -f .env && sed -i.tmp '/[MYSQL|MARIADB]_ROOT_PASSWORD/d' ./.env \
+		test -f .env \
+		&& sed -i.tmp '/[MYSQL|MARIADB]_ROOT_PASSWORD/d' ./.env \
 		&& rm .env.tmp \
 		&& echo "The db root-passwords has been removed from your .env file." \
 		|| true ;\
+		\
+		docker volume rm lemp_mariadb-persistence ;\
+		echo "PhpMyAdmin web root persistence was wiped." ;\
 	else \
 		echo "Operation canceled." ;\
 		exit 1 ;\
