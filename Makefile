@@ -2,7 +2,7 @@ SHELL=/usr/bin/env bash
 GREEN='\033[0;32m'
 BOLD='\033[1m'
 NC='\033[0m'
-COMPOSE_CMD:= docker-compose -f .docker/docker-compose.yml --env-file .env
+COMPOSE_CMD:=docker-compose -f .docker/docker-compose.yml --env-file .env
 PROJECT_NAME=lemp
 
 .PHONY: help
@@ -43,8 +43,8 @@ wipe_db: down
 	@read -p "This will wipe your local databases. Continue? [y/N] " -n 1 REPLY ;\
 	echo "" ;\
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		docker volume rm $(PROJECT_NAME)_phpmyadmin-html ;\
-		docker volume rm $(PROJECT_NAME)_mysql-persistence ;\
+		docker volume rm $(PROJECT_NAME)_mariadb-persistence && docker volume create $(PROJECT_NAME)_mariadb-persistence ;\
+		docker volume rm $(PROJECT_NAME)_mysql-persistence && docker volume create $(PROJECT_NAME)_mysql-persistence ;\
 		echo "Your databases have been wiped." ;\
 		\
 		test -f .env \
@@ -52,28 +52,26 @@ wipe_db: down
 		&& rm .env.tmp \
 		&& echo "The db root-passwords has been removed from your .env file." \
 		|| true ;\
-		\
-		docker volume rm lemp_mariadb-persistence ;\
-		echo "PhpMyAdmin web root persistence was wiped." ;\
 	else \
 		echo "Operation canceled." ;\
 		exit 1 ;\
 	fi
 
 .PHONY: clean
-clean: down wipe_db
+clean: wipe_db
+	@$(COMPOSE_CMD) down -v
 	@test -f .env && mv .env .env.bak && echo "Your .env file has been deleted (backed-up as .env.bak)." || true
 	@test -d src/vendor && rm -fr src/vendor && echo "Your /vendor folder has been deleted." || true
 	@echo -e $(GREEN)$(BOLD)"Everything is clean now."$(NC)
 
 .PHONY: composer
 composer:
-	$(COMPOSE_CMD) run --rm composer $(ARGS)
+	@$(COMPOSE_CMD) run --rm composer $(ARGS)
 
 
 .PHONY: php
 php:
-	$(COMPOSE_CMD) run --workdir="/code" --rm php-fpm php $(ARGS)
+	@$(COMPOSE_CMD) run --workdir="/code" --rm php-fpm php $(ARGS)
 
 
 .PHONY: docker-compose dc

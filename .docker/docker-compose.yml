@@ -7,6 +7,8 @@ volumes:
   phpmyadmin-html:
   mysql-persistence:
   mariadb-persistence:
+  composer-cache:
+  composer-home:
 
 services:
   nginx:
@@ -106,8 +108,14 @@ services:
     container_name: lemp_ctr_composer
     restart: 'no'
     command: "install"
+    environment:
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
+      COMPOSER_HOME: /tmp/composer-home
     volumes:
-      # Composer only needs write-access to /vendor, composer.json & composer.lock
+      - composer-cache:/tmp/composer-cache
+      - ${COMPOSER_HOME:-composer-home}:/tmp/composer-home # saves composer config in docker volume, if var is not set.
+
+      # Composer only needs write-access to /vendor, composer.json & composer.lock.
       # For PSR-4 / PSR-0 auto-loading, it will need read-only access to the rest of the code base, though.
       - ../src:/app:ro
       - ../src/composer.json:/app/composer.json:rw
