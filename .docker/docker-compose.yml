@@ -1,34 +1,36 @@
 version: '2'
 
 networks:
-  lemp_net:
+  net:
 
 volumes:
   phpmyadmin-html:
+  mysql-persistence:
+  mariadb-persistence:
 
 services:
   nginx:
     image: nginx:1
-    container_name: lemp_container_nginx
+    container_name: lemp_ctr_nginx
     ports:
       - "${NGINX_PORT}:80"
       - "${PMA_PORT}:81"
     volumes:
-      - ../src:/code
+      - ../src:/code:ro
       - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
       - phpmyadmin-html:/var/www/html/:ro
     depends_on:
       - php-fpm
       - phpmyadmin
     networks:
-      - lemp_net
+      - net
 
   mariadb:
     image: mariadb:10
-    container_name: lemp_container_mariadb
+    container_name: lemp_ctr_mariadb
     volumes:
-      - ./mariadb/db_persistence:/var/lib/mysql:rw
-      - ./mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - mariadb-persistence:/var/lib/mysql:rw
+      - ./mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
     ports:
       - "${MARIADB_PORT}:3306"
     environment:
@@ -38,15 +40,15 @@ services:
       MYSQL_USER: ${MARIADB_USER}
       MYSQL_PASSWORD: ${MARIADB_PASSWORD}
     networks:
-      - lemp_net
+      - net
 
   mysql:
     image: mysql:8
-    container_name: lemp_container_mysql
+    container_name: lemp_ctr_mysql
     volumes:
-      - ./mysql/db_persistence:/var/lib/mysql:rw
-      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro  # remove to disable memory optimization (see .docker/mysql/my.cnf)
-      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - mysql-persistence:/var/lib/mysql:rw
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro # remove mount to disable mem-optimization (see .docker/mysql/my.cnf)
+      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
     ports:
       - "${MYSQL_PORT}:3306"
     environment:
@@ -56,15 +58,15 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     networks:
-      - lemp_net
+      - net
 
   php-fpm:
     build:
       dockerfile: ./php-fpm/Dockerfile
       context: .
-    container_name: lemp_container_php_fpm
+    container_name: lemp_ctr_php_fpm
     volumes:
-      - ../src:/code
+      - ../src:/code:ro # nothing should have access to modify source-code. Use separate mount for FS-cache etc.!
     environment:
       MYSQL_HOST: mysql
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -75,14 +77,14 @@ services:
       MARIADB_USER: ${MARIADB_USER}
       MARIADB_PASSWORD: ${MARIADB_PASSWORD}
     networks:
-      - lemp_net
+      - net
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:5-fpm-alpine
-    container_name: lemp_container_phpmyadmin
+    container_name: lemp_ctr_phpmyadmin
     volumes:
-      - ./phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
-      - phpmyadmin-html:/var/www/html/
+      - ./phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php:ro
+      - phpmyadmin-html:/var/www/html/:rw
     environment:
       PMA_ARBITRARY: 0
       MYSQL_HOST: "mysql"
@@ -97,18 +99,19 @@ services:
       - mysql
       - mariadb
     networks:
-      - lemp_net
+      - net
 
   composer:
     image: prooph/composer:8.0 # remember that this version needs to match the php-fpm image-version!
-    container_name: lemp_container_composer
+    container_name: lemp_ctr_composer
     restart: 'no'
     command: "install"
     volumes:
-      - ../src:/app
+      # Composer only needs write-access to /vendor, composer.json & composer.lock
+      # For PSR-4 / PSR-0 auto-loading, it will need read-only access to the rest of the code base, though.
+      - ../src:/app:ro
+      - ../src/composer.json:/app/composer.json:rw
+      - ../src/composer.lock:/app/composer.lock:rw
+      - ../src/vendor:/app/vendor:rw
     networks:
-      - lemp_net
-
-
-
-
+      - net

@@ -3,6 +3,7 @@ GREEN='\033[0;32m'
 BOLD='\033[1m'
 NC='\033[0m'
 COMPOSE_CMD:= docker-compose -f .docker/docker-compose.yml --env-file .env
+PROJECT_NAME=lemp
 
 .PHONY: help
 help:
@@ -42,14 +43,18 @@ wipe_db: down
 	@read -p "This will wipe your local databases. Continue? [y/N] " -n 1 REPLY ;\
 	echo "" ;\
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		rm -fr .docker/mysql/db_persistence/* ;\
-		rm -fr .docker/mariadb/db_persistence/* ;\
+		docker volume rm $(PROJECT_NAME)_phpmyadmin-html ;\
+		docker volume rm $(PROJECT_NAME)_mysql-persistence ;\
 		echo "Your databases have been wiped." ;\
 		\
-		test -f .env && sed -i.tmp '/[MYSQL|MARIADB]_ROOT_PASSWORD/d' ./.env \
+		test -f .env \
+		&& sed -i.tmp '/[MYSQL|MARIADB]_ROOT_PASSWORD/d' ./.env \
 		&& rm .env.tmp \
 		&& echo "The db root-passwords has been removed from your .env file." \
 		|| true ;\
+		\
+		docker volume rm lemp_mariadb-persistence ;\
+		echo "PhpMyAdmin web root persistence was wiped." ;\
 	else \
 		echo "Operation canceled." ;\
 		exit 1 ;\
@@ -58,7 +63,7 @@ wipe_db: down
 .PHONY: clean
 clean: down wipe_db
 	@test -f .env && mv .env .env.bak && echo "Your .env file has been deleted (backed-up as .env.bak)." || true
-	@test -f src/vendor && rm -fr src/vendor && echo "Your /vendor folder has been deleted." || true
+	@test -d src/vendor && rm -fr src/vendor && echo "Your /vendor folder has been deleted." || true
 	@echo -e $(GREEN)$(BOLD)"Everything is clean now."$(NC)
 
 .PHONY: composer
