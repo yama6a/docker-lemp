@@ -7,15 +7,15 @@ COMPOSE_CMD:= docker-compose -f .docker/docker-compose.yml --env-file .env
 .PHONY: help
 help:
 	@echo
-	@echo "Usage: make [target] ..."
-	@echo "Targets:"
-	@echo "up             Starts all containers and initializes the project on the first run."
-	@echo "down           Shuts down all containers. This does not cause any data loss."
-	@echo "wipe_db        Deletes all DB content and users. New DB will be created on the next run with new root passwords."
-	@echo "clean          Deleted the DB (see wipe_db), removes resets env-variables and wipes the app's vendor folder."
-	@echo "composer       An alias to run the composer CLI in this project (e.g. try:  'make composer update' )."
-	@echo "php            Allows access to the PHP CLI for this project. (e.g. try:  'make php -a' )."
-	@echo "dc, dcompose   Wrapper for docker compose."
+	@echo " Usage: make [target] ..."
+	@echo " Targets:"
+	@echo " up ................... Starts all containers and initializes the project on the first run."
+	@echo " down ................. Shuts down all containers. This does not cause any data loss."
+	@echo " wipe_db .............. Deletes all DB content and users. New DB will be created on the next run with new root passwords."
+	@echo " clean ................  Deleted the DB (see wipe_db), removes resets env-variables and wipes the app's vendor folder."
+	@echo " composer ............. An alias to run the composer CLI in this project (e.g. try:  'make composer update' )."
+	@echo " php .................. Allows access to the PHP CLI for this project. (e.g. try:  'make php -a' )."
+	@echo " dc, docker-compose ... Wrapper for docker compose."
 	@echo
 
 .PHONY: up
@@ -41,7 +41,7 @@ down:
 wipe_db: down
 	@read -p "This will wipe your local databases. Continue? [y/N] " -n 1 REPLY ;\
 	echo "" ;\
-	if [[ $$REPLY =~ ^[Yy]$$ ]]; then\
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
 		rm -fr .docker/mysql/db_persistence/* ;\
 		rm -fr .docker/mariadb/db_persistence/* ;\
 		echo "Your databases have been wiped." ;\
