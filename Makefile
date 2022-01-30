@@ -62,7 +62,7 @@ wipe_db: down
 .PHONY: clean
 clean: down wipe_db
 	@test -f .env && mv .env .env.bak && echo "Your .env file has been deleted (backed-up as .env.bak)." || true
-	@test -f src/vendor && rm -fr src/vendor && echo "Your /vendor folder has been deleted." || true
+	@test -d src/vendor && rm -fr src/vendor && echo "Your /vendor folder has been deleted." || true
 	@echo -e $(GREEN)$(BOLD)"Everything is clean now."$(NC)
 
 .PHONY: composer

@@ -11,7 +11,7 @@ volumes:
 services:
   nginx:
     image: nginx:1
-    container_name: lemp_container_nginx
+    container_name: lemp_ctr_nginx
     ports:
       - "${NGINX_PORT}:80"
       - "${PMA_PORT}:81"
@@ -27,7 +27,7 @@ services:
 
   mariadb:
     image: mariadb:10
-    container_name: lemp_container_mariadb
+    container_name: lemp_ctr_mariadb
     volumes:
       - mariadb-persistence:/var/lib/mysql:rw
       - ./mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
@@ -44,7 +44,7 @@ services:
 
   mysql:
     image: mysql:8
-    container_name: lemp_container_mysql
+    container_name: lemp_ctr_mysql
     volumes:
       - mysql-persistence:/var/lib/mysql:rw
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro # remove mount to disable mem-optimization (see .docker/mysql/my.cnf)
@@ -64,7 +64,7 @@ services:
     build:
       dockerfile: ./php-fpm/Dockerfile
       context: .
-    container_name: lemp_container_php_fpm
+    container_name: lemp_ctr_php_fpm
     volumes:
       - ../src:/code:ro # nothing should have access to modify source-code. Use separate mount for FS-cache etc.!
     environment:
@@ -81,7 +81,7 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:5-fpm-alpine
-    container_name: lemp_container_phpmyadmin
+    container_name: lemp_ctr_phpmyadmin
     volumes:
       - ./phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php:ro
       - phpmyadmin-html:/var/www/html/:rw
@@ -103,7 +103,7 @@ services:
 
   composer:
     image: prooph/composer:8.0 # remember that this version needs to match the php-fpm image-version!
-    container_name: lemp_container_composer
+    container_name: lemp_ctr_composer
     restart: 'no'
     command: "install"
     volumes:

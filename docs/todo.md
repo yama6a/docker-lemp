@@ -9,6 +9,11 @@
 - [x] Use docker volume instead of FS mount for DB persistence
 
 ### ToDo
+- [ ] Ensure composer container can access private repos
+  - https://forums.docker.com/t/ssh-agent-forwarding-into-docker-compose-environment-is-not-working/93320
+  - https://hub.docker.com/_/composer
+- [ ] Allow composer to have persistent cache and maybe persistent config
+  - https://hub.docker.com/_/composer
 - [ ] Add Postgres support
 - [ ] Turn into Cookiecutter template
    1. Allow choosing DB
