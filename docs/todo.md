@@ -8,6 +8,7 @@
 - [x] Reduce MySQL container idle mem footprint (360MB --> 80MB)
 
 ### ToDo
+- [ ] Use docker volume instead of FS mount for DB persistence
 - [ ] Add Postgres support
 - [ ] Turn into Cookiecutter template
    1. Allow choosing DB
