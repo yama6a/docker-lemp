@@ -75,7 +75,8 @@ is updated.
 ### Interfaces
 By default, the following ports/URIs are assigned to the respective services:
 
-- NginX: http://localhost:55001
+- NginX: 55001 (http://localhost:55001)
+- PhpMyAdmin: 55002 (for both MariaDB **and** MySQL: http://localhost:55002)
+- MySQL: 55003
+- MariaDB: 55004
 - PHP-FPM: 9000
-- MySQL: 55002 (PhpMyAdmin: http://localhost:55003)
-- MariaDB: 55004 (PhpMyAdmin: http://localhost:55005)
