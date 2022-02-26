@@ -13,7 +13,7 @@ help:
 	@echo " up ................... Starts all containers and initializes the project on the first run."
 	@echo " down ................. Shuts down all containers. This does not cause any data loss."
 	@echo " wipe_db .............. Deletes all DB content and users. New DB will be created on the next run with new root passwords."
-	@echo " clean ................  Deleted the DB (see wipe_db), removes resets env-variables and wipes the app's vendor folder."
+	@echo " clean ................ Deletes the DB (see wipe_db), resets env-variables and wipes the app's vendor folder."
 	@echo " composer ............. An alias to run the composer CLI in this project (e.g. try:  'make composer update' )."
 	@echo " php .................. Allows access to the PHP CLI for this project. (e.g. try:  'make php -a' )."
 	@echo " dc, docker-compose ... Wrapper for docker compose."

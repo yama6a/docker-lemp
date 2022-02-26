@@ -20,7 +20,8 @@ function getResults(array $connectionParams)
     }
 
     $output = sprintf(
-        strtoupper($connectionParams['host']) . " Database connection via %s %s!",
+        strtoupper($connectionParams['host']) . " Database connection to <b>%s</b> via <b>%s</b> %s!",
+        $connectionParams['host'],
         $connectionParams['driver'],
         $isDbConnected ? "successful" : "failed"
     );

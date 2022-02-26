@@ -7,6 +7,7 @@ volumes:
   phpmyadmin-html:
   mysql-persistence:
   mariadb-persistence:
+  postgres-persistence:
   composer-cache:
   composer-home:
 
@@ -24,6 +25,21 @@ services:
     depends_on:
       - php-fpm
       - phpmyadmin
+    networks:
+      - net
+
+  postgres:
+    image: postgres:14-alpine
+    container_name: lemp_ctr_postgres
+    volumes:
+      - postgres-persistence:/var/lib/postgresql/data:rw
+      - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - net
 
@@ -78,6 +94,10 @@ services:
       MARIADB_DATABASE: ${MARIADB_DATABASE}
       MARIADB_USER: ${MARIADB_USER}
       MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      POSTGRES_HOST: postgres
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - net
 
