@@ -7,6 +7,7 @@ Containerized environment consisting of the following containers:
 - PHP-FPM v8.0
 - MariaDB v10   
 - MySQL v8   
+- Postgres v14
 - Composer v2
 - PhpMyAdmin v5
 
@@ -18,7 +19,7 @@ For simplicity's sake, we have added a small wrapper around Make. This allows us
 respective commands the idiomatic way. If you don't like using `./make` instead of just `make`, you can add this 
 one-liner to your `.bashrc` or `.bash_profile`:
 ```bash
-function make(){ if [ -f ./make ]; then ./make $@; else make $@; fi }
+function make(){ if [ -f ./make ]; then ./make $@; else `which make` $@; fi }
 ```
 
 ### Set Up
@@ -79,4 +80,6 @@ By default, the following ports/URIs are assigned to the respective services:
 - PhpMyAdmin: 55002 (for both MariaDB **and** MySQL: http://localhost:55002)
 - MySQL: 55003
 - MariaDB: 55004
+- Postgres: 55005
+- Postgres CLI: run `make pg`
 - PHP-FPM: 9000

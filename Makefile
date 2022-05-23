@@ -1,7 +1,8 @@
 SHELL=/usr/bin/env bash
-GREEN='\033[0;32m'
-BOLD='\033[1m'
-NC='\033[0m'
+RED=\033[0;31m
+GREEN=\033[0;32m
+BOLD=\033[1m
+NC=\033[0m
 COMPOSE_CMD:=docker-compose -f .docker/docker-compose.yml --env-file .env
 PROJECT_NAME=lemp
 
@@ -22,7 +23,7 @@ help:
 .PHONY: up
 up:
 	@# Copy .env file
-	@test -f .env || (cp .env.example .env && echo -e $(GREEN)$(BOLD)"Copied .env.example to .env"$(NC)"\n")
+	@test -f .env || (cp .env.example .env && echo -e '$(GREEN)$(BOLD)'"Copied .env.example to .env"'$(NC)'"\n")
 
 	@# Start all containers and pipe output to current shell
 	@# If the DB containers are run for the first time, it will also save DB root passwords into the .env file
@@ -45,6 +46,7 @@ wipe_db: down
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
 		docker volume rm $(PROJECT_NAME)_mariadb-persistence && docker volume create $(PROJECT_NAME)_mariadb-persistence ;\
 		docker volume rm $(PROJECT_NAME)_mysql-persistence && docker volume create $(PROJECT_NAME)_mysql-persistence ;\
+		docker volume rm $(PROJECT_NAME)_postgres-persistence && docker volume create $(PROJECT_NAME)_postgres-persistence ;\
 		echo "Your databases have been wiped." ;\
 		\
 		test -f .env \
@@ -59,10 +61,10 @@ wipe_db: down
 
 .PHONY: clean
 clean: wipe_db
-	@$(COMPOSE_CMD) down -v
+	@$(COMPOSE_CMD) down -v --remove-orphans
 	@test -f .env && mv .env .env.bak && echo "Your .env file has been deleted (backed-up as .env.bak)." || true
 	@test -d src/vendor && rm -fr src/vendor && echo "Your /vendor folder has been deleted." || true
-	@echo -e $(GREEN)$(BOLD)"Everything is clean now."$(NC)
+	@echo -e '$(GREEN)$(BOLD)'"Everything is clean now."'$(NC)'
 
 .PHONY: composer
 composer:
@@ -77,3 +79,18 @@ php:
 .PHONY: docker-compose dc
 docker-compose dc:
 	$(COMPOSE_CMD) $(ARGS)
+
+.PHONY: pgcli pg psql
+pgcli pg psql:
+	@export $$(cat .env | grep POSTGRES_ | xargs) ;\
+	export PGHOST=localhost PGPORT=$$POSTGRES_PORT PGUSER=$$POSTGRES_USER PGPASSWORD=$$POSTGRES_PASSWORD PGDATABASE=$$POSTGRES_DATABASE ;\
+	if ! hash pgcli 2>/dev/null; then \
+		if ! hash psql 2>/dev/null; then \
+            echo -e "neither $(RED)pgcli$(NC) nor $(RED)psql$(NC) are installed; please install at least one of them!" ;\
+            exit 1 ;\
+		fi ;\
+		echo -e "$(RED)pgcli$(NC) command line utility not found; falling back to $(RED)psql$(NC)..." ;\
+		psql ;\
+	else \
+		pgcli ;\
+	fi
