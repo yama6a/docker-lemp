@@ -20,7 +20,8 @@ function getResults(array $connectionParams)
     }
 
     $output = sprintf(
-        strtoupper($connectionParams['host']) . " Database connection via %s %s!",
+        strtoupper($connectionParams['host']) . " Database connection to <b>%s</b> via <b>%s</b> %s!",
+        $connectionParams['host'],
         $connectionParams['driver'],
         $isDbConnected ? "successful" : "failed"
     );
@@ -33,8 +34,8 @@ function getResults(array $connectionParams)
 
     $data = $dbConnection->createQueryBuilder()
         ->select('*')
-        ->from('customers')
-        ->leftJoin('customers', 'animal_customer', 'animal_customer', 'customers.id = animal_customer.customer_id')
+        ->from('animal_customer')
+        ->leftJoin('animal_customer', 'customers', 'customers', 'customers.id = animal_customer.customer_id')
         ->leftJoin('animal_customer', 'animals', 'animals', 'animal_customer.animal_id = animals.id')
         ->fetchAllAssociative();
 
