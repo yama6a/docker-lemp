@@ -18,5 +18,10 @@
     include 'mysql.php'
     ?>
 </p>
+<p>
+    <?php
+    include 'postgres.php'
+    ?>
+</p>
 </body>
 </html>
