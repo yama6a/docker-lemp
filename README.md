@@ -33,6 +33,7 @@ function make(){ if [ -f ./make ]; then ./make $@; else `which make` $@; fi }
    If you don't want this to happen, feel free to simply delete the respective *.sql files in:
    - `.docker/mysql/docker-entrypoint-initdb.d`
    - `.docker/mariadb/docker-entrypoint-initdb.d`
+   - `.docker/postgres/docker-entrypoint-initdb.d`
    
 ### Changing the PHP version
 
@@ -68,7 +69,7 @@ is updated.
    and run `docker system prune -a` but be aware that this will remove all stopped containers,
    networks, images, etc from your system, even the ones not related to this project!
 6. If you stop and/or delete the containers of this project,
-   you don't lose anything as long as you keep the `./.docker/**/db_persistence` folders intact.
+   you don't lose anything as long as you keep `*_presistence`volumes intact (see volumes in `docker-compose.yml`).
    To wipe the DBs, use the command `./make wipe_db`.
 7. For a really fresh install, stop and remove all containers, db persistence, composer dependencies and env variables
    using the `./make clean` command followed by a fresh `./make up`.
