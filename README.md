@@ -3,8 +3,8 @@ Lightweight LEMP dev-setup
 Containerized environment consisting of the following containers:
 ( All versions can be easily adapted! )
 
-- NGinX
-- PHP-FPM v8.0
+- NGinX v1
+- PHP-FPM v8.1
 - MariaDB v10   
 - MySQL v8   
 - Postgres v14

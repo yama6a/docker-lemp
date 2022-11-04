@@ -1,5 +1,7 @@
+ARG IMAGE=dev
+
 # remember that the composer docker-image version in the docker-compose.yml needs to match this version !
-FROM php:8.0-fpm
+FROM php:8.1-fpm AS dev
 
 RUN apt-get update
 RUN apt-get install -y libzip-dev libpq-dev libpng-dev libmemcached-dev
@@ -13,3 +15,12 @@ RUN docker-php-ext-install $PHP_EXTENSIONS
 # It's unlikely that you need both, redis and memcached. Remember to remove what you don't need!
 ARG PECL_EXTENSIONS="redis memcached"
 RUN pecl install $PECL_EXTENSIONS && docker-php-ext-enable $PECL_EXTENSIONS
+
+# This part only gets called if you call `docker build` with --build-arg IMAGE=deploy.
+# In development mode (using docker-copmose), we don't use that build-arg but mount the folder instead,
+# rather than copying the files, so we don't have to rebuild the image every time we make a change.
+FROM dev as deploy
+WORKDIR /
+ONBUILD COPY src /code/
+
+FROM ${IMAGE}
