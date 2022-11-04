@@ -9,7 +9,7 @@ PROJECT_NAME=my-awesome-project
 VERSION?=local
 
 .PHONY: help
-help2: ## Display this help.
+help: ## Display this help.
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 .PHONY: up
@@ -58,6 +58,11 @@ clean: wipe_db ## Deletes the DB (see wipe_db), resets env-variables and wipes t
 	@test -d src/vendor && rm -fr src/vendor && echo "Your /vendor folder has been deleted." || true
 	@echo -e '$(GREEN)$(BOLD)'"Everything is clean now."'$(NC)'
 
+.PHONY: build
+build: ## Builds the release-images for php-fpm and nginx
+	docker build -f .docker/php-fpm/Dockerfile -t $(PROJECT_NAME)-php:$(VERSION) --build-arg IMAGE=deploy .
+	docker build -f .docker/nginx/Dockerfile -t $(PROJECT_NAME)-nginx:$(VERSION) --build-arg IMAGE=deploy .
+	# ToDo: in k8s pod manifest, add host entry for php-fpm -> 127.0.0.1 (php-fpm is referenced in nginx' default.conf)
 
 #########################################
 ####   Development CLI tools below   ####
@@ -66,8 +71,9 @@ clean: wipe_db ## Deletes the DB (see wipe_db), resets env-variables and wipes t
 php: ## Allows access to the PHP CLI for this project. (e.g. try:  'make php -a' ).
 	@$(COMPOSE_CMD) run --workdir="/code" --rm php-fpm php $(ARGS)
 
-.PHONY: docker-compose dc
-docker-compose dc: ## Wrapper for docker-compose.
+
+.PHONY: dc
+dc: ## Wrapper for docker-compose.
 	$(COMPOSE_CMD) $(ARGS)
 
 .PHONY: composer

@@ -13,7 +13,9 @@ volumes:
 
 services:
   nginx:
-    image: nginx:1-alpine
+    build:
+      dockerfile: ./.docker/nginx/Dockerfile
+      context: ../
     container_name: "${COMPOSE_PROJECT_NAME}_ctr_nginx"
     ports:
       - "${NGINX_PORT}:80"
