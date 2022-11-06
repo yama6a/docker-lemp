@@ -30,6 +30,20 @@ up: ## Starts all containers and inimake celtializes the project on the first ru
 down: ## Shuts down all containers. This does not cause any data loss.
 	@$(COMPOSE_CMD) down
 
+.PHONY: build
+build: ## Builds the release-images for php-fpm and nginx
+	docker build -f .docker/php-fpm/Dockerfile -t $(PROJECT_NAME)-php:$(VERSION) --build-arg IMAGE=deploy .
+	docker build -f .docker/nginx/Dockerfile -t $(PROJECT_NAME)-nginx:$(VERSION) --build-arg IMAGE=deploy .
+	# ToDo: in k8s pod manifest, add host entry for php-fpm -> 127.0.0.1 (php-fpm is referenced in nginx' default.conf)
+	# https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/
+
+	# ToDO: Continue here: https://matthewpalmer.net/kubernetes-app-developer/articles/php-fpm-nginx-kubernetes.html
+
+.PHONY: clean
+clean: wipe_db wipe_images ## Deletes the DB, containers, images, env-variables and wipes the app's vendor folder.
+	@test -f .env && mv .env .env.bak && echo "Your .env file has been deleted (backed-up as .env.bak)." || true
+	@test -d src/vendor && rm -fr src/vendor && echo "Your /vendor folder has been deleted." || true
+	@echo -e '$(GREEN)$(BOLD)'"Everything is clean now."'$(NC)'
 
 .PHONY: wipe_db
 wipe_db: down ## Deletes all DB content and users. New DB will be created on the next run with new root passwords.
@@ -51,18 +65,13 @@ wipe_db: down ## Deletes all DB content and users. New DB will be created on the
 		exit 1 ;\
 	fi
 
-.PHONY: clean
-clean: wipe_db ## Deletes the DB (see wipe_db), resets env-variables and wipes the app's vendor folder.
-	@$(COMPOSE_CMD) down -v --remove-orphans
-	@test -f .env && mv .env .env.bak && echo "Your .env file has been deleted (backed-up as .env.bak)." || true
-	@test -d src/vendor && rm -fr src/vendor && echo "Your /vendor folder has been deleted." || true
-	@echo -e '$(GREEN)$(BOLD)'"Everything is clean now."'$(NC)'
+.PHONY: wipe_containers
+wipe_containers: ## Stops and deletes all containers
+	$(COMPOSE_CMD) down -v --remove-orphans
 
-.PHONY: build
-build: ## Builds the release-images for php-fpm and nginx
-	docker build -f .docker/php-fpm/Dockerfile -t $(PROJECT_NAME)-php:$(VERSION) --build-arg IMAGE=deploy .
-	docker build -f .docker/nginx/Dockerfile -t $(PROJECT_NAME)-nginx:$(VERSION) --build-arg IMAGE=deploy .
-	# ToDo: in k8s pod manifest, add host entry for php-fpm -> 127.0.0.1 (php-fpm is referenced in nginx' default.conf)
+.PHONY: wipe_images
+wipe_images: wipe_containers ## Deletes all built images built by docker-compose and `make build`. Images will be rebuilt on next call of `make up`.
+	docker rmi $$(docker images "$(PROJECT_NAME)*" --format "{{.ID}}") || true
 
 #########################################
 ####   Development CLI tools below   ####
