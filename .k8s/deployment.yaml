@@ -1,0 +1,67 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: my-awesome-project
+  name: my-awesome-project-deployment
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: my-awesome-project-app
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: my-awesome-project-app
+    spec:
+      volumes:
+        - name: shared-files # Create the shared-files volume to be used in both pods
+          emptyDir: {}
+        - name: nginx-config-volume # Add the ConfigMap as a volume for the pod
+          configMap:
+            name: nginx-config
+
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+            - "php-fpm"
+            - "nginx"
+      containers:
+        # The nginx container, which uses the configuration declared above,
+        # along with the files shared with the PHP-FPM app.
+        - image: nginx:1  # ToDo: pin the nginx version here and in docker-compose?
+          name: nginx
+          volumeMounts:
+            - name: shared-files
+              mountPath: /code
+            - name: nginx-config-volume
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+        - image: 902409284726.dkr.ecr.eu-west-1.amazonaws.com/yama-test/my-awesome-project-repo:0.0.1
+          imagePullPolicy: Always
+          name: my-awesome-project-app
+          volumeMounts:
+            - name: shared-files
+              mountPath: /shared
+          # Important! After this container has started, the PHP files
+          # in our Docker image aren't in the shared volume. We need to
+          # get them into the shared volume. If we tried to write directly
+          # to this volume from our Docker image the files wouldn't appear
+          # in the nginx container.
+          #
+          # So, after the container has started, copy the PHP files from this
+          # container's local filesystem (/code -- added via the Docker image)
+          # to the shared volume, which is mounted at /var/www/html.
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "cp -r /code/. /shared"]
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "25m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
