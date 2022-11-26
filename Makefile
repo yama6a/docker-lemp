@@ -53,6 +53,7 @@ wipe_db: down ## Deletes all DB content and users. New DB will be created on the
 		docker volume rm $(PROJECT_NAME)_mariadb-persistence && docker volume create $(PROJECT_NAME)_mariadb-persistence ;\
 		docker volume rm $(PROJECT_NAME)_mysql-persistence && docker volume create $(PROJECT_NAME)_mysql-persistence ;\
 		docker volume rm $(PROJECT_NAME)_postgres-persistence && docker volume create $(PROJECT_NAME)_postgres-persistence ;\
+		docker volume rm $(PROJECT_NAME)_dynamodb-persistence && docker volume create $(PROJECT_NAME)_dynamodb-persistence ;\
 		echo "Your databases have been wiped." ;\
 		\
 		test -f .env \

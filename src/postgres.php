@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 require_once 'vendor/autoload.php';
-require_once 'results.php';
+require_once 'sql_results.php';
 
 print getResults([
     'dbname'   => $_ENV['POSTGRES_DATABASE'] ?? null,

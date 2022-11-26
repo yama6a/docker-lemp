@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LEMMPPP Docker</title>
+    <title>LEMMPPPD Docker</title>
 </head>
 <body>
-<p>LEMMPPP = Linux, NGinX, MySQL, MariaDB, PHP, PHPMyAdmin, PostGreSQL</p>
+<p>LEMMPPPD = Linux, NGinX, MySQL, MariaDB, PHP, PHPMyAdmin, PostGreSQL, DynamoDB</p>
 <p>Remove what you dont need!</p>
 <p></p>
 <p>
@@ -21,6 +21,11 @@
 <p>
     <?php
     include 'postgres.php'
+    ?>
+</p>
+<p>
+    <?php
+    include 'dynamodb.php'
     ?>
 </p>
 </body>
