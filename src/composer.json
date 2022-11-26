@@ -6,7 +6,9 @@
     "php": "7.4.*",
     "doctrine/dbal": "^3.1",
     "illuminate/support": "^8.40",
-    "ext-pdo": "*"
+    "ext-pdo": "*",
+    "aws/aws-sdk-php": "^3.247",
+    "ramsey/uuid": "^4.2"
   },
   "authors": [
     {

@@ -8,6 +8,7 @@ volumes:
   mysql-persistence:
   mariadb-persistence:
   postgres-persistence:
+  dynamodb-persistence:
   composer-cache:
   composer-home:
 
@@ -22,6 +23,20 @@ services:
       - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - php-fpm
+    networks:
+      - net
+
+  dynamodb:
+    image:  amazon/dynamodb-local:1.20.0
+    container_name: my-dynamodb
+    hostname: dynamodb
+    restart: always
+    volumes:
+      -  dynamodb-persistence:/home/dynamodblocal/data:rw
+    ports:
+      - 8000:8000
+    user: root # required to access mounted file system, because this emulator is trash
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/data/"
     networks:
       - net
 
@@ -95,6 +110,10 @@ services:
       POSTGRES_DATABASE: ${POSTGRES_DATABASE}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      DYNAMODB_ENDPOINT: ${DYNAMODB_ENDPOINT}
     networks:
       - net
 
