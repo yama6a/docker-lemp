@@ -84,10 +84,7 @@ function migrateIfNecessary(DynamoDbClient $client)
                 'KeyType'       => 'HASH',
             ],
         ],
-        'ProvisionedThroughput' => [
-            'ReadCapacityUnits'  => 20,
-            'WriteCapacityUnits' => 10,
-        ],
+        'BillingMode' => 'PAY_PER_REQUEST',
     ]);
 
     $client->waitUntil('TableExists', [
