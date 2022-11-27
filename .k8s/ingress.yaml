@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  namespace: my-awesome-project
+  namespace: my-awesome-project-ns
   name: my-awesome-project-ingress
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing

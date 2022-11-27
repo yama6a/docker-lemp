@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: my-awesome-project
+  namespace: my-awesome-project-ns
   name: my-awesome-project-service
 spec:
   ports:

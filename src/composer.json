@@ -8,7 +8,8 @@
     "illuminate/support": "^8.40",
     "ext-pdo": "*",
     "aws/aws-sdk-php": "^3.247",
-    "ramsey/uuid": "^4.2"
+    "ramsey/uuid": "^4.2",
+    "ext-json": "*"
   },
   "authors": [
     {

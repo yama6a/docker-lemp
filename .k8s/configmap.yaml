@@ -11,7 +11,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: nginx-config
-  namespace: my-awesome-project
+  namespace: my-awesome-project-ns
 data:
   default.conf: |
     server {
