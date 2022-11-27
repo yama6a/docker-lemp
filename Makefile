@@ -33,11 +33,11 @@ down: ## Shuts down all containers. This does not cause any data loss.
 .PHONY: build
 build: ## Builds the release-images for php-fpm and nginx
 	docker build -f .docker/php-fpm/Dockerfile -t $(PROJECT_NAME)-php:$(VERSION) --build-arg IMAGE=deploy .
-	docker build -f .docker/nginx/Dockerfile -t $(PROJECT_NAME)-nginx:$(VERSION) --build-arg IMAGE=deploy .
-	# ToDo: in k8s pod manifest, add host entry for php-fpm -> 127.0.0.1 (php-fpm is referenced in nginx' default.conf)
-	# https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/
 
-	# ToDO: Continue here: https://matthewpalmer.net/kubernetes-app-developer/articles/php-fpm-nginx-kubernetes.html
+.PHONY: push
+push: build ## Pushes the release-image to the registry
+	docker tag $(PROJECT_NAME)-php:$(VERSION) 902409284726.dkr.ecr.eu-west-1.amazonaws.com/yama-test/$(PROJECT_NAME)-repo:$(VERSION)
+	docker push 902409284726.dkr.ecr.eu-west-1.amazonaws.com/yama-test/$(PROJECT_NAME)-repo:$(VERSION)
 
 .PHONY: clean
 clean: wipe_db wipe_images ## Deletes the DB, containers, images, env-variables and wipes the app's vendor folder.
@@ -72,7 +72,7 @@ wipe_containers: ## Stops and deletes all containers
 
 .PHONY: wipe_images
 wipe_images: wipe_containers ## Deletes all built images built by docker-compose and `make build`. Images will be rebuilt on next call of `make up`.
-	docker rmi $$(docker images "$(PROJECT_NAME)*" --format "{{.ID}}") || true
+	docker rmi $$(docker images "*$(PROJECT_NAME)*" --format "{{.ID}}") -f || true
 
 #########################################
 ####   Development CLI tools below   ####
