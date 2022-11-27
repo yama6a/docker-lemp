@@ -20,8 +20,9 @@ function getDynamoResults(array $connectionParams)
     $output        = "";
     $isDbConnected = true;
     try {
-        $client = new DynamoDbClient($connectionParams);
-        migrateIfNecessary($client);
+        $client    = new DynamoDbClient($connectionParams);
+        $marshaler = new Marshaler();
+        migrateIfNecessary($client, $marshaler);
     } catch (Exception $e) {
         $isDbConnected = false;
         $output        = $e->getMessage();
@@ -33,21 +34,20 @@ function getDynamoResults(array $connectionParams)
     }
 
 
-    echo "fetching data from DynamoDB...";
     $output   .= "<ul>";
     $iterator = $client->getIterator('Scan', ['TableName' => 'my-awesome-project.animal_customer']);
     foreach ($iterator as $row) {
-        foreach ($row['pets']['L'] as $pet) {
-            $pet    = $pet['M'];
+        $obj = $marshaler->unmarshalItem($row);
+        foreach ($obj['pets'] as $pet) {
             $output .= "<li>";
             $output .= htmlspecialchars(sprintf("%s %s has %u %s %s %s %s.",
-                $row['first_name']['S'],
-                $row['last_name']['S'],
-                $pet['count']['N'],
-                $pet['has_fur']['BOOL'] ? "hairy" : "smooth",
-                $pet['color']['S'],
-                $pet['species']['S'],
-                Str::plural($pet['name']['S'], $pet['count']['N'])
+                $obj['first_name'],
+                $obj['last_name'],
+                $pet['count'],
+                $pet['has_fur'] ? "hairy" : "smooth",
+                $pet['color'],
+                $pet['species'],
+                Str::plural($pet['name'], $pet['count'])
             ));
             $output .= "</li>";
         }
@@ -57,7 +57,7 @@ function getDynamoResults(array $connectionParams)
     return $output;
 }
 
-function migrateIfNecessary(DynamoDbClient $client)
+function migrateIfNecessary(DynamoDbClient $client, Marshaler $marshaler)
 {
     $iterator = $client->getIterator('ListTables');
 
@@ -70,18 +70,8 @@ function migrateIfNecessary(DynamoDbClient $client)
 
     $client->createTable([
         'TableName'            => 'my-awesome-project.animal_customer',
-        'AttributeDefinitions' => [
-            [
-                'AttributeName' => 'id',
-                'AttributeType' => 'S',
-            ],
-        ],
-        'KeySchema'            => [
-            [
-                'AttributeName' => 'id',
-                'KeyType'       => 'HASH',
-            ],
-        ],
+        'AttributeDefinitions' => [['AttributeName' => 'id', 'AttributeType' => 'S']],
+        'KeySchema'            => [['AttributeName' => 'id', 'KeyType' => 'HASH']],
         'BillingMode'          => 'PAY_PER_REQUEST',
     ]);
 
@@ -89,7 +79,6 @@ function migrateIfNecessary(DynamoDbClient $client)
         'TableName' => 'my-awesome-project.animal_customer',
     ]);
 
-    $marshaler = new Marshaler();
     $client->putItem([
         'TableName' => 'my-awesome-project.animal_customer',
         'Item'      => $marshaler->marshalJson(json_encode([
