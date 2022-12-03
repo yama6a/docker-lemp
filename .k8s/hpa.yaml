@@ -1,13 +1,13 @@
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: my-awesome-project-hpa
-  namespace: my-awesome-project-ns
+  name: my-awesome-service-hpa
+  namespace: my-awesome-service-ns
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: my-awesome-project-deployment
+    name: my-awesome-service-deployment
   minReplicas: 3
   maxReplicas: 7
   metrics:
