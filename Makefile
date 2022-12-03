@@ -5,7 +5,7 @@ YELLOW=\033[1;33m
 BOLD=\033[1m
 NC=\033[0m
 COMPOSE_CMD:=docker-compose -f .docker/docker-compose.yml --env-file .env
-PROJECT_NAME=my-awesome-project
+PROJECT_NAME=my-awesome-service
 VERSION?=local
 
 .PHONY: help
@@ -36,8 +36,8 @@ build: ## Builds the release-images for php-fpm and nginx
 
 .PHONY: push
 push: build ## Pushes the release-image to the registry
-	docker tag $(PROJECT_NAME)-php:$(VERSION) 902409284726.dkr.ecr.eu-west-1.amazonaws.com/yama-test/$(PROJECT_NAME)-repo:$(VERSION)
-	docker push 902409284726.dkr.ecr.eu-west-1.amazonaws.com/yama-test/$(PROJECT_NAME)-repo:$(VERSION)
+	docker tag $(PROJECT_NAME)-php:$(VERSION) 902409284726.dkr.ecr.eu-west-1.amazonaws.com/$(PROJECT_NAME)-repo:$(VERSION)
+	docker push 902409284726.dkr.ecr.eu-west-1.amazonaws.com/$(PROJECT_NAME)-repo:$(VERSION)
 
 .PHONY: clean
 clean: wipe_db wipe_images ## Deletes the DB, containers, images, env-variables and wipes the app's vendor folder.
@@ -91,12 +91,12 @@ composer: ## An alias to run the composer CLI in this project (e.g. try:  'make 
 	@$(COMPOSE_CMD) run --rm composer $(ARGS)
 
 .PHONY: pgcli
-pgcli: # Runs pgcli in a container and connects to the postgres development DB
+pgcli: ## Runs pgcli in a container and connects to the postgres development DB
 	export $$(cat .env | grep POSTGRES_ | xargs) > /dev/null && \
 	docker run -it --network=host --rm kubetools/pgcli postgresql://$$POSTGRES_USER:$$POSTGRES_PASSWORD@localhost:$$POSTGRES_PORT/$$POSTGRES_DATABASE
 
 .PHONY: psql
-psql: # Runs psql in a container and connects to the postgres development DB
+psql: ## Runs psql in a container and connects to the postgres development DB
 	export $$(cat .env | grep POSTGRES_ | xargs) > /dev/null && \
 	docker exec -e PGHOST=localhost -e PGUSER=$$POSTGRES_USER -e PGPASSWORD=$$POSTGRES_PASSWORD -e PGDATABASE=$$POSTGRES_DATABASE -it $(PROJECT_NAME)_ctr_postgres psql ;\
 
