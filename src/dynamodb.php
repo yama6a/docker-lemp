@@ -35,7 +35,7 @@ function getDynamoResults(array $connectionParams)
 
 
     $output   .= "<ul>";
-    $iterator = $client->getIterator('Scan', ['TableName' => 'my-awesome-project.animal_customer']);
+    $iterator = $client->getIterator('Scan', ['TableName' => 'my-awesome-service.animal_customer']);
     foreach ($iterator as $row) {
         $obj = $marshaler->unmarshalItem($row);
         foreach ($obj['pets'] as $pet) {
@@ -62,25 +62,25 @@ function migrateIfNecessary(DynamoDbClient $client, Marshaler $marshaler)
     $iterator = $client->getIterator('ListTables');
 
     foreach ($iterator as $tableName) {
-        if ($tableName === 'my-awesome-project.animal_customer') {
+        if ($tableName === 'my-awesome-service.animal_customer') {
             return; // no need to migrate
         }
     }
 
 
     $client->createTable([
-        'TableName'            => 'my-awesome-project.animal_customer',
+        'TableName'            => 'my-awesome-service.animal_customer',
         'AttributeDefinitions' => [['AttributeName' => 'id', 'AttributeType' => 'S']],
         'KeySchema'            => [['AttributeName' => 'id', 'KeyType' => 'HASH']],
         'BillingMode'          => 'PAY_PER_REQUEST',
     ]);
 
     $client->waitUntil('TableExists', [
-        'TableName' => 'my-awesome-project.animal_customer',
+        'TableName' => 'my-awesome-service.animal_customer',
     ]);
 
     $client->putItem([
-        'TableName' => 'my-awesome-project.animal_customer',
+        'TableName' => 'my-awesome-service.animal_customer',
         'Item'      => $marshaler->marshalJson(json_encode([
             'id'         => Uuid::uuid4()->toString(),
             'phone'      => "+46 - 72 886 1234",
@@ -108,7 +108,7 @@ function migrateIfNecessary(DynamoDbClient $client, Marshaler $marshaler)
     ]);
 
     $client->putItem([
-        'TableName' => 'my-awesome-project.animal_customer',
+        'TableName' => 'my-awesome-service.animal_customer',
         'Item'      => $marshaler->marshalJson(json_encode([
             'id'         => Uuid::uuid4()->toString(),
             'phone'      => '+1 - 555 1234',
@@ -128,7 +128,7 @@ function migrateIfNecessary(DynamoDbClient $client, Marshaler $marshaler)
     ]);
 
     $client->putItem([
-        'TableName' => 'my-awesome-project.animal_customer',
+        'TableName' => 'my-awesome-service.animal_customer',
         'Item'      => $marshaler->marshalJson(json_encode([
             'id'         => Uuid::uuid4()->toString(),
             'phone'      => '+30 - 443 1122',
@@ -148,7 +148,7 @@ function migrateIfNecessary(DynamoDbClient $client, Marshaler $marshaler)
     ]);
 
     $client->putItem([
-        'TableName' => 'my-awesome-project.animal_customer',
+        'TableName' => 'my-awesome-service.animal_customer',
         'Item'      => $marshaler->marshalJson(json_encode([
             'id'         => Uuid::uuid4()->toString(),
             'phone'      => '+555 - 998 1222',
