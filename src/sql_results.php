@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 // Don't hate me for this file. It's ugly, I know!
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Illuminate\Support\Str;
 
@@ -30,6 +31,10 @@ function getResults(array $connectionParams)
         http_response_code(500);
         print $output;
         exit(1);
+    }
+
+    if ($connectionParams['driver'] === 'pdo_pgsql') {
+        migratePgIfNecessary($dbConnection);
     }
 
     $data = $dbConnection->createQueryBuilder()
@@ -62,4 +67,16 @@ function getResults(array $connectionParams)
     $output .= "</ul>";
 
     return $output;
+}
+
+// check if table animal_customer exists, if not, run migrations from pg_migrations/*.sql
+function migratePgIfNecessary(Connection $dbConnection)
+{
+    $schemaManager = $dbConnection->createSchemaManager();
+    if (!$schemaManager->tablesExist(['animal_customer'])) {
+        $migrations = glob(__DIR__ . '/pg_migrations/*.sql');
+        foreach ($migrations as $migration) {
+            $dbConnection->executeStatement(file_get_contents($migration));
+        }
+    }
 }
