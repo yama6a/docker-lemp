@@ -45,7 +45,7 @@ services:
     container_name: "${COMPOSE_PROJECT_NAME}_ctr_postgres"
     volumes:
       - postgres-persistence:/var/lib/postgresql/data:rw
-      - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+#      - ../migrations_postgres:/docker-entrypoint-initdb.d:ro
     ports:
       - "${POSTGRES_PORT}:5432"
     environment:
@@ -60,7 +60,7 @@ services:
     container_name: "${COMPOSE_PROJECT_NAME}_ctr_mariadb"
     volumes:
       - mariadb-persistence:/var/lib/mysql:rw
-      - ./mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+#      - ../migrations_mariadb:/docker-entrypoint-initdb.d:ro
     ports:
       - "${MARIADB_PORT}:3306"
     environment:
@@ -78,7 +78,7 @@ services:
     volumes:
       - mysql-persistence:/var/lib/mysql:rw
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro # remove mount to disable mem-optimization (see .docker/mysql/my.cnf)
-      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+#      - ../migrations_mysql:/docker-entrypoint-initdb.d:ro
     ports:
       - "${MYSQL_PORT}:3306"
     environment:

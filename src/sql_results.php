@@ -5,38 +5,11 @@ declare(strict_types=1);
 // Don't hate me for this file. It's ugly, I know!
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Exception as DBALException;
 use Illuminate\Support\Str;
 
-function getResults(array $connectionParams)
+function getResults(Connection $dbConnection): string
 {
-    $isDbConnected = false;
-    try {
-        $dbConnection  = DriverManager::getConnection($connectionParams);
-        $isDbConnected = $dbConnection->connect() && $dbConnection->isConnected();
-    } catch (PDOException | \Doctrine\DBAL\Exception $e) {
-        $stdErr = fopen('php://stderr', 'wb');
-        fwrite($stdErr, sprintf("[ERROR] %s", $e->getMessage()));
-        fclose($stdErr);
-        // ToDo: write stack-trace to Monolog or some such
-    }
-
-    $output = sprintf(
-        " Database connection to <b>%s</b> via <b>%s</b> %s!",
-        $connectionParams['host'],
-        $connectionParams['driver'],
-        $isDbConnected ? "successful" : "failed"
-    );
-
-    if (!$isDbConnected) {
-        http_response_code(500);
-        print $output;
-        exit(1);
-    }
-
-    if ($connectionParams['driver'] === 'pdo_pgsql') {
-        migratePgIfNecessary($dbConnection);
-    }
-
     $data = $dbConnection->createQueryBuilder()
         ->select('*')
         ->from('animal_customer')
@@ -47,7 +20,7 @@ function getResults(array $connectionParams)
     // sort array by customer ID
     usort($data, fn(array $row1, array $row2) => $row1['customer_id'] ?? 0 <=> $row2['customer_id'] ?? 0);
 
-    $output .= "<ul>";
+    $output = "<ul>";
 
     $currentCustomerId = 0;
     foreach ($data as $row) {
@@ -69,14 +42,33 @@ function getResults(array $connectionParams)
     return $output;
 }
 
-// check if table animal_customer exists, if not, run migrations from pg_migrations/*.sql
-function migratePgIfNecessary(Connection $dbConnection)
+/**
+ * @param array $connectionParams
+ * @return Connection
+ */
+function dbalConnect(array $connectionParams): Connection
 {
-    $schemaManager = $dbConnection->createSchemaManager();
-    if (!$schemaManager->tablesExist(['animal_customer'])) {
-        $migrations = glob(__DIR__ . '/pg_migrations/*.sql');
-        foreach ($migrations as $migration) {
-            $dbConnection->executeStatement(file_get_contents($migration));
-        }
+    $isDbConnected = false;
+    try {
+        $dbConnection  = DriverManager::getConnection($connectionParams);
+        $isDbConnected = $dbConnection->connect() && $dbConnection->isConnected();
+    } catch (PDOException|DBALException $e) {
+        handleException($e->getMessage());
     }
+
+    if (!$isDbConnected) {
+        handleException(sprintf(" Database connection to <b>%s</b> via <b>%s</b> failed!", $connectionParams['host'], $connectionParams['driver']));
+    }
+
+    return $dbConnection;
+}
+
+function handleException(string $message): void
+{
+    http_response_code(500);
+    $stdErr = fopen('php://stderr', 'wb');
+    fwrite($stdErr, sprintf("[ERROR] %s", $message));
+    fclose($stdErr);
+    print ($message);
+    exit(1);
 }
