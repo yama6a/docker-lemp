@@ -17,11 +17,11 @@ ARG PECL_EXTENSIONS="redis memcached"
 RUN pecl install $PECL_EXTENSIONS && docker-php-ext-enable $PECL_EXTENSIONS
 
 # Ini Settings
-RUN apt-get install -y python3-pip
+RUN echo "memory_limit = 512M" >> "$PHP_INI_DIR/php.ini"
 
 # DEBUGGING tools for PostGres
+#RUN apt-get install -y python3-pip
 #RUN pip install pgcli
-#RUN echo "memory_limit = 512M" >> "$PHP_INI_DIR/php.ini"
 
 # This part only gets called if you call `docker build` with --build-arg IMAGE=deploy.
 # In development mode (using docker-copmose), we don't use that build-arg but mount the folder instead,
@@ -29,6 +29,5 @@ RUN apt-get install -y python3-pip
 FROM dev as deploy
 WORKDIR /
 ONBUILD COPY src /code/
-ONBUILD COPY .docker/postgres/docker-entrypoint-initdb.d/* /code/pg_migrations/
 
 FROM ${IMAGE}
