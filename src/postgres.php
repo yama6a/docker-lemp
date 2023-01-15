@@ -29,17 +29,10 @@ if (($_ENV['POSTGRES_IAM_AUTH'] ?? null)) {
     $connectionParams['sslmode'] = 'require';
 }
 
-try {
-    $dbConnection = dbalConnect($connectionParams);
-} catch (Exception $e) {
-    $stdErr = fopen('php://stderr', 'wb');
-    fwrite($stdErr, sprintf("[ERROR] %s", $e->getMessage()));
-    fclose($stdErr);
-}
-
-
+$dbConnection = dbalConnect($connectionParams);
 migratePgIfNecessary($dbConnection);
 
+print sprintf(" Database connection to <b>Postgres</b> %s!", "successful");
 print getResults($dbConnection);
 
 

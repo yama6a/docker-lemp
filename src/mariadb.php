@@ -7,6 +7,16 @@ require_once 'sql_results.php';
 
 use Doctrine\DBAL\Connection;
 
+// Token gets generated, but somehow the token doesn't allow access to DB. Use user/pw auth for now.
+//function getIamToken()
+//{
+//    $provider         = CredentialProvider::defaultProvider();
+//    $RdsAuthGenerator = new Aws\Rds\AuthTokenGenerator($provider);
+//
+//    return $RdsAuthGenerator->createToken($_ENV['MARIADB_HOST'] . ":5432", "eu-west-1", $_ENV['MARIADB_USER']);
+//}
+//$password = ($_ENV['MARIADB_IAM_AUTH'] ?? null) ? getIamToken() : $_ENV['MARIADB_PASSWORD'] ?? null;
+
 $connectionParams = [
     'dbname'   => $_ENV['MARIADB_DATABASE'] ?? null,
     'password' => $_ENV['MARIADB_PASSWORD'] ?? null,
@@ -15,20 +25,14 @@ $connectionParams = [
     'driver'   => 'pdo_mysql',
 ];
 
-if (($_ENV['MYSQL_IAM_AUTH'] ?? null)) {
+if (($_ENV['MARIADB_IAM_AUTH'] ?? null)) {
     $connectionParams['sslmode'] = 'require';
 }
 
-try {
-    $dbConnection = dbalConnect($connectionParams);
-} catch (Exception $e) {
-    $stdErr = fopen('php://stderr', 'wb');
-    fwrite($stdErr, sprintf("[ERROR] %s", $e->getMessage()));
-    fclose($stdErr);
-}
-
+$dbConnection = dbalConnect($connectionParams);
 migrateMariaDBfNecessary($dbConnection);
 
+print sprintf(" Database connection to <b>MariaDB</b> %s!", "successful");
 print getResults($dbConnection);
 
 
