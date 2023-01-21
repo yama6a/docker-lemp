@@ -13,7 +13,7 @@ help: ## Display this help.
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: ## Starts all containers and inimake celtializes the project on the first run.
+up: ## Starts all containers and initializes the project on the first run.
 	@# Copy .env file
 	@test -f .env || (cp .env.example .env && echo -e '$(GREEN)$(BOLD)'"Copied .env.example to .env"'$(NC)'"\n" && sed -i '' -r -e 's/COMPOSE_PROJECT_NAME=".*"/COMPOSE_PROJECT_NAME="$(PROJECT_NAME)"/' .env)
 

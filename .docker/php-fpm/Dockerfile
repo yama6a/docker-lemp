@@ -1,7 +1,7 @@
 ARG IMAGE=dev
 
-# remember that the composer docker-image version in the docker-compose.yml needs to match this version !
-FROM php:8.1-fpm AS dev
+# remember that the composer docker-image version in the docker-compose.yml needs to match the minor version (e.g. 8.1)!
+FROM php:8.1.14-fpm AS dev
 
 RUN apt-get update
 RUN apt-get install -y libzip-dev libpq-dev libpng-dev libmemcached-dev
