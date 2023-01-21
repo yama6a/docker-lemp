@@ -4,12 +4,14 @@
   "type": "project",
   "require": {
     "php": "8.1.*",
+    "ext-json": "*",
+    "ext-memcache": "*",
+    "ext-memcached": "*",
+    "ext-pdo": "*",
     "doctrine/dbal": "^3.1",
     "illuminate/support": "^8.40",
-    "ext-pdo": "*",
     "aws/aws-sdk-php": "^3.247",
-    "ramsey/uuid": "^4.2",
-    "ext-json": "*"
+    "ramsey/uuid": "^4.2"
   },
   "authors": [
     {

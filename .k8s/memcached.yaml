@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: my-awesome-service-ns
+  name: my-awesome-service-memcached
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: my-awesome-service-memcached
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: my-awesome-service-memcached
+    spec:
+      containers:
+        - image: memcached:1.6.18-alpine
+          name: memcached
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 11211
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "25m"
+            limits:
+              memory: "1Gi"
+              cpu: "100m"

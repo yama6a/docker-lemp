@@ -28,5 +28,10 @@
     include 'dynamodb.php'
     ?>
 </p>
+<p>
+    <?php
+    include 'memcached.php'
+    ?>
+</p>
 </body>
 </html>

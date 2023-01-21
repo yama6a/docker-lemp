@@ -4,12 +4,12 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: my-awesome-service-ns
-  name: my-awesome-service-http-svc
+  name: my-awesome-service-memcached-svc
 spec:
   ports:
-    - port: 80
-      targetPort: 80
+    - port: 11211
+      targetPort: 11211
       protocol: TCP
   type: NodePort
   selector:
-    app.kubernetes.io/name: my-awesome-service-app
+    app.kubernetes.io/name: my-awesome-service-memcached
