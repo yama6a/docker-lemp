@@ -7,4 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
-      - uses: michaelw90/PHP-Lint@master
+      - uses: overtrue/phplint@8.1
+        with:
+          path: .
+          options: --exclude=vendor
