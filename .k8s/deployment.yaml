@@ -41,6 +41,10 @@ spec:
         - image: 902409284726.dkr.ecr.eu-west-1.amazonaws.com/my-awesome-service-repo:v0.1
           name: my-awesome-service-app
           env:
+            - name: SERVICE_NAME
+              value: "my-awesome-service"
+            - name: EVENT_BUS_NAME
+              value: "my-awesome-service"
             - name: DYNAMODB_ENDPOINT
               value: "https://dynamodb.eu-west-1.amazonaws.com"
             - name: POSTGRES_USER
