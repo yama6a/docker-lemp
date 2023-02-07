@@ -96,8 +96,10 @@ services:
       context: .
     container_name: "${COMPOSE_PROJECT_NAME}_ctr_php_fpm"
     volumes:
-      - ../src:/code:ro # nothing should have access to modify source-code. Use separate mount for FS-cache etc.!
+      - ../src:/code:ro # nothing should have access to modify source-code. Use separate mount for FS-cache, uploaded files, etc.!
     environment:
+      SERVICE_NAME: ${COMPOSE_PROJECT_NAME}
+      EVENT_BUS_NAME: ${COMPOSE_PROJECT_NAME}
       MYSQL_HOST: mysql
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}

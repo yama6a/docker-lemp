@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 require_once 'vendor/autoload.php';
 
@@ -28,7 +26,7 @@ function getDynamoResults(array $connectionParams)
         $output        = $e->getMessage();
     }
 
-    $output .= sprintf(" Database connection to <b>DynamoDB</b> %s!", $isDbConnected ? "successful" : "failed");
+    $output .= sprintf(" Database connection to <b>DynamoDB</b> %s!", $isDbConnected ? "<span style='color: green'>successful!</span>" : "<span style='color: red'>failed!</span>");
     if (!$isDbConnected) {
         return $output;
     }

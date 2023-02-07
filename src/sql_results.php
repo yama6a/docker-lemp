@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 // Don't hate me for this file. It's ugly, I know!
 use Doctrine\DBAL\Connection;
