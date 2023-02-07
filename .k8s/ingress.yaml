@@ -20,7 +20,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: my-awesome-service-service
+                name: my-awesome-service-http-svc
                 port:
                   number: 80
     - host: my-awesome-service.yamasa.link
