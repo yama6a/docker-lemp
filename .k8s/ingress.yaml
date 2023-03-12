@@ -7,7 +7,7 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/group.name: shared  # use the same group-name to share the ALB (they cost money!)
+    alb.ingress.kubernetes.io/group.name: shared  # use the same group-name to share the ALB across services (they cost money!)
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]' # enable SSL (the ALB-Controller automatically searches for the HOST specified in the rules below and pegs a matching cert to the ALB)
     external-dns.alpha.kubernetes.io/hostname: my-awesome-service.api.yamasa.cloud, my-awesome-service.yamasa.link # if you have a custom domain, add it here and in the TF variable. (this supports a comma-separated list)
 spec:
@@ -25,3 +25,4 @@ spec:
                   number: 80
     - host: my-awesome-service.yamasa.link
       http: *http_rules
+# todo: restrict the rule above to only allow /pub routes.
