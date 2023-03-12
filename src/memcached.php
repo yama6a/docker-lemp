@@ -14,7 +14,7 @@ $tmp_object = new stdClass;
 $tmp_object->str_attr = 'test';
 $tmp_object->int_attr = 123;
 
-$putSuccessful = $memcached->set('my_object', $tmp_object, 10);
+$putSuccessful = $memcached->set('my_object', $tmp_object, 1);
 if (!$putSuccessful) {
     echo "<li><span style='color: red'><b>Failed</b> to store object in memcached!</span></li>";
     return;
