@@ -10,22 +10,23 @@ if (!$connected || $memcached->getAllKeys() === false){
 }
 
 echo "Fetching <b>Events</b> <span style='color: green'>successful!</span><ul><li>Connected to Memcached server!</li>";
-if($cachedPublishedEvents = $memcached->get('published_events')){
-    $cachedPublishedEvents = unserialize($cachedPublishedEvents) ?: [];
+echo "<li>Published Events:</li><ul>";
+$cachedPublishedEvents = $memcached->get('published_events');
+if ($cachedPublishedEvents){
+    foreach (explode(",", $cachedPublishedEvents) as $event_id) {
+        if($event_id === "") continue;
+        $event = unserialize($memcached->get($event_id));
+        echo "<li>Unserialized Event Object: <xmp>".json_encode($event, JSON_PRETTY_PRINT)."</xmp></li>";
+    }
+    echo "</ul>";
+    echo "Published Event Count: <xmp>".$memcached->get('published_events_count')."</xmp></li>";
 }
-echo "<li>Published Events: <xmp>".($cachedPublishedEvents === false ? "[]" : json_encode($cachedPublishedEvents, JSON_PRETTY_PRINT))."</xmp></li>";
 
 $currentURI = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-
 echo <<<EOT
 <li>
     <form style="display: inline" action="/event_publisher.php" method="post">
-        <input type="hidden" name="event" value="skipEventbridge"/>
-        <input type="hidden" name="redirect" value="$currentURI"/>
-        <input type="submit" value="Publish But Skip Event"/>
-    </form>
-    <form style="display: inline" action="/event_publisher.php" method="post">
-        <input type="hidden" name="event" value="withEventbridge"/>
+        <input type="hidden" name="detail-type" value="AnimalCreatedEvent"/>
         <input type="hidden" name="redirect" value="$currentURI"/>
         <input type="submit" value="Publish To Eventbride"/>
     </form>
