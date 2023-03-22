@@ -114,7 +114,7 @@ mariadb: ## Runs the MySQL CLI and connects to the MariaDB Development DB
 	docker exec -it $(PROJECT_NAME)_ctr_mariadb mysql -u $$MARIADB_USER -p$$MARIADB_PASSWORD --database $$MARIADB_DATABASE
 
 .PHONY: mock_event
-mock_event: ## `EVENT_NAME=MyEvent mock_event '{"foo":"bar"}'` Sends a mock event to the consumed event queue
+mock_event: ## Sends a mock event to the consumed event queue. Example:   EVENT_NAME=MyEvent mock_event '{"foo":"bar"}'
 	docker run --net=host --rm -it -v ~/.aws:/root/.aws amazon/aws-cli sqs send-message \
 	--queue-url http://elasticmq:9324/queue/event-queue.fifo \
 	--endpoint=http://localhost:9324 \
