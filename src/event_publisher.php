@@ -47,6 +47,11 @@ function publishEventToEventBridge(object $eventObj): void
         return;
     }
 
+    if($_ENV['AWS_REGION'] === "local"){
+        echo "<li><span style='color: orange'><b>Warning: Local Environment!</b> Event not published to EventBridge!</span> Couldn't publish event to EventBridge, because the environment variable AWS_REGION is set to 'local'!</li></ul>";
+        return;
+    }
+
     if (!isset($_ENV['SERVICE_NAME'])) {
         echo "<li><span style='color: red'><b>Failed</b> to publish event to EventBridge!</span> Couldn't publish event to EventBridge, because the environment variable SERVICE_NAME is not set!</li></ul>";
         return;
