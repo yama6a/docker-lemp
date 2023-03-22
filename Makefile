@@ -7,6 +7,9 @@ NC=\033[0m
 COMPOSE_CMD:=docker-compose -f .docker/docker-compose.yml --env-file .env
 PROJECT_NAME=my-awesome-service
 VERSION?=local
+EVENT_NAME?=MyEventName
+EVENT_SOURCE?=$(PROJECT_NAME)
+MESSAGE_GROUP?=default
 
 .PHONY: help
 help: ## Display this help.
@@ -28,7 +31,7 @@ up: ## Starts all containers and initializes the project on the first run.
 
 .PHONY: down
 down: ## Shuts down all containers. This does not cause any data loss.
-	@$(COMPOSE_CMD) down
+	$(COMPOSE_CMD) down
 
 .PHONY: build
 build: ## Builds the release-images for php-fpm and nginx
@@ -79,7 +82,7 @@ wipe_images: wipe_containers ## Deletes all built images built by docker-compose
 #########################################
 .PHONY: php
 php: ## Allows access to the PHP CLI for this project. (e.g. try:  'make php -a' ).
-	@$(COMPOSE_CMD) run --workdir="/code" --rm php-fpm php $(ARGS)
+	$(COMPOSE_CMD) run --workdir="/code" --rm php-fpm php $(ARGS)
 
 
 .PHONY: dc
@@ -88,7 +91,7 @@ dc: ## Wrapper for docker-compose.
 
 .PHONY: composer
 composer: ## An alias to run the composer CLI in this project (e.g. try:  'make composer update' ).
-	@$(COMPOSE_CMD) run --rm composer $(ARGS)
+	$(COMPOSE_CMD) run --rm composer --ignore-platform-req=ext-* --ignore-platform-req=ext-* $(ARGS)
 
 .PHONY: pgcli
 pgcli: ## Runs pgcli in a container and connects to the postgres development DB
@@ -109,3 +112,13 @@ mysql: ## Runs the MySQL CLI and connects to MySQL development DB
 mariadb: ## Runs the MySQL CLI and connects to the MariaDB Development DB
 	export $$(cat .env | grep MARIADB_ | xargs) > /dev/null && \
 	docker exec -it $(PROJECT_NAME)_ctr_mariadb mysql -u $$MARIADB_USER -p$$MARIADB_PASSWORD --database $$MARIADB_DATABASE
+
+.PHONY: mock_event
+mock_event: ## `EVENT_NAME=MyEvent mock_event '{"foo":"bar"}'` Sends a mock event to the consumed event queue
+	docker run --net=host --rm -it -v ~/.aws:/root/.aws amazon/aws-cli sqs send-message \
+	--queue-url http://elasticmq:9324/queue/event-queue.fifo \
+	--endpoint=http://localhost:9324 \
+	--message-group-id=$(MESSAGE_GROUP) \
+	--message-deduplication-id=`date +%s` \
+	--message-body '{"version":"0","id":"b68011c4-8c99-ca6d-ef31-34c3b5e3fd06","detail-type":"$(EVENT_NAME)","source":"$(EVENT_SOURCE)","account":"000111222333","time":"2023-03-22T19:22:20Z","region":"eu-west-1","resources":[],"detail":$(ARGS)}' \
+
