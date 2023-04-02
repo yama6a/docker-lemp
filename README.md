@@ -84,3 +84,10 @@ By default, the following ports/URIs are assigned to the respective services:
 - Postgres: 55005
 - Postgres CLI: run `make pg`
 - PHP-FPM: 9000
+
+
+### Development ToDo
+- [ ] Allow for proper paths in URI vs using the ?path query param
+- [ ] Allow using URI parameters in path
+- [ ] Build a way for auto schema migrations (maybe with a container that runs both in k8s and locally via docker compose maybe)
+- [ ] Add Middleware Support

@@ -19,7 +19,7 @@ services:
     ports:
       - "${NGINX_PORT}:80"
     volumes:
-      - ../src:/code:ro
+      - ../code:/code:ro
       - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - php-fpm
@@ -93,7 +93,7 @@ services:
       context: .
     container_name: "${COMPOSE_PROJECT_NAME}_ctr_php_fpm"
     volumes:
-      - ../src:/code:ro # nothing should have access to modify source-code. Use separate mount for FS-cache, uploaded files, etc.!
+      - ../code:/code:ro # nothing should have access to modify source-code. Use separate mount for FS-cache, uploaded files, etc.!
     environment:
       SERVICE_NAME: ${COMPOSE_PROJECT_NAME}
       EVENT_BUS_NAME: ${COMPOSE_PROJECT_NAME}
@@ -159,14 +159,14 @@ services:
       COMPOSER_HOME: /tmp/composer-home
     volumes:
       - composer-cache:/tmp/composer-cache
-      - ${COMPOSER_HOME:-composer-home}:/tmp/composer-home # saves composer config in docker volume, if var is not set.
+      - ${COMPOSER_HOME:-composer-home}:/tmp/composer-home # saves composer config in docker volume, if user doesn't have composer installed on host machine.
 
       # Composer only needs write-access to /vendor, composer.json & composer.lock.
       # For PSR-4 / PSR-0 auto-loading, it will need read-only access to the rest of the code base, though.
-      - ../src:/app:ro
-      - ../src/composer.json:/app/composer.json:rw
-      - ../src/composer.lock:/app/composer.lock:rw
-      - ../src/vendor:/app/vendor:rw
+      - ../code:/app:ro
+      - ../code/composer.json:/app/composer.json:rw
+      - ../code/composer.lock:/app/composer.lock:rw
+      - ../code/vendor:/app/vendor:rw
     networks:
       - net
 

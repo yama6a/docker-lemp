@@ -28,6 +28,7 @@ RUN echo "memory_limit = 512M" >> "$PHP_INI_DIR/php.ini"
 # rather than copying the files, so we don't have to rebuild the image every time we make a change.
 FROM dev as deploy
 WORKDIR /
-ONBUILD COPY src /code/
+ONBUILD COPY code /code/
+RUN echo "display_errors = off" >> "$PHP_INI_DIR/php.ini"
 
 FROM ${IMAGE}

@@ -3,7 +3,7 @@
 // Don't hate me for this file. It's ugly, I know!
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Exception as DBALException;
+use Doctrine\DBAL\DBALException as DBALException;
 use Illuminate\Support\Str;
 
 function getResults(Connection $dbConnection): string

@@ -15,6 +15,20 @@ MESSAGE_GROUP?=default
 help: ## Display this help.
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
+##@ Build & Deploy
+
+.PHONY: build
+build: ## Builds the release-images for php-fpm and nginx
+	docker build -f .docker/php-fpm/Dockerfile -t $(PROJECT_NAME)-php:$(VERSION) --build-arg IMAGE=deploy .
+
+.PHONY: push
+push: build ## Pushes the release-image to the registry
+	docker tag $(PROJECT_NAME)-php:$(VERSION) 902409284726.dkr.ecr.eu-west-1.amazonaws.com/$(PROJECT_NAME)-repo:$(VERSION)
+	docker push 902409284726.dkr.ecr.eu-west-1.amazonaws.com/$(PROJECT_NAME)-repo:$(VERSION)
+
+
+##@ Local Setup
+
 .PHONY: up
 up: ## Starts all containers and initializes the project on the first run.
 	@# Copy .env file
@@ -33,19 +47,10 @@ up: ## Starts all containers and initializes the project on the first run.
 down: ## Shuts down all containers. This does not cause any data loss.
 	$(COMPOSE_CMD) down
 
-.PHONY: build
-build: ## Builds the release-images for php-fpm and nginx
-	docker build -f .docker/php-fpm/Dockerfile -t $(PROJECT_NAME)-php:$(VERSION) --build-arg IMAGE=deploy .
-
-.PHONY: push
-push: build ## Pushes the release-image to the registry
-	docker tag $(PROJECT_NAME)-php:$(VERSION) 902409284726.dkr.ecr.eu-west-1.amazonaws.com/$(PROJECT_NAME)-repo:$(VERSION)
-	docker push 902409284726.dkr.ecr.eu-west-1.amazonaws.com/$(PROJECT_NAME)-repo:$(VERSION)
-
 .PHONY: clean
 clean: wipe_db wipe_images ## Deletes the DB, containers, images, env-variables and wipes the app's vendor folder.
 	@test -f .env && mv .env .env.bak && echo "Your .env file has been deleted (backed-up as .env.bak)." || true
-	@test -d src/vendor && rm -fr src/vendor && echo "Your /vendor folder has been deleted." || true
+	@test -d code/vendor && rm -fr code/vendor && echo "Your /vendor folder has been deleted." || true
 	@echo -e '$(GREEN)$(BOLD)'"Everything is clean now."'$(NC)'
 
 .PHONY: wipe_db
@@ -77,13 +82,20 @@ wipe_containers: ## Stops and deletes all containers
 wipe_images: wipe_containers ## Deletes all built images built by docker-compose and `make build`. Images will be rebuilt on next call of `make up`.
 	docker rmi $$(docker images "*$(PROJECT_NAME)*" --format "{{.ID}}") -f || true
 
-#########################################
-####   Development CLI tools below   ####
-#########################################
+.PHONY: mock_event
+mock_event: ## Sends a mock event to the consumed event queue. Example:   EVENT_NAME=MyEvent mock_event '{"foo":"bar"}'
+	docker run --net=host --rm -it -v ~/.aws:/root/.aws amazon/aws-cli sqs send-message \
+	--queue-url http://elasticmq:9324/queue/event-queue.fifo \
+	--endpoint=http://localhost:9324 \
+	--message-group-id=$(MESSAGE_GROUP) \
+	--message-deduplication-id=`date +%s` \
+	--message-body '{"version":"0","id":"b68011c4-8c99-ca6d-ef31-34c3b5e3fd06","detail-type":"$(EVENT_NAME)","source":"$(EVENT_SOURCE)","account":"000111222333","time":"2023-03-22T19:22:20Z","region":"eu-west-1","resources":[],"detail":$(ARGS)}' \
+
+
+##@ Development CLI Tools
 .PHONY: php
 php: ## Allows access to the PHP CLI for this project. (e.g. try:  'make php -a' ).
 	$(COMPOSE_CMD) run --workdir="/code" --rm php-fpm php $(ARGS)
-
 
 .PHONY: dc
 dc: ## Wrapper for docker-compose.
@@ -112,13 +124,4 @@ mysql: ## Runs the MySQL CLI and connects to MySQL development DB
 mariadb: ## Runs the MySQL CLI and connects to the MariaDB Development DB
 	export $$(cat .env | grep MARIADB_ | xargs) > /dev/null && \
 	docker exec -it $(PROJECT_NAME)_ctr_mariadb mysql -u $$MARIADB_USER -p$$MARIADB_PASSWORD --database $$MARIADB_DATABASE
-
-.PHONY: mock_event
-mock_event: ## Sends a mock event to the consumed event queue. Example:   EVENT_NAME=MyEvent mock_event '{"foo":"bar"}'
-	docker run --net=host --rm -it -v ~/.aws:/root/.aws amazon/aws-cli sqs send-message \
-	--queue-url http://elasticmq:9324/queue/event-queue.fifo \
-	--endpoint=http://localhost:9324 \
-	--message-group-id=$(MESSAGE_GROUP) \
-	--message-deduplication-id=`date +%s` \
-	--message-body '{"version":"0","id":"b68011c4-8c99-ca6d-ef31-34c3b5e3fd06","detail-type":"$(EVENT_NAME)","source":"$(EVENT_SOURCE)","account":"000111222333","time":"2023-03-22T19:22:20Z","region":"eu-west-1","resources":[],"detail":$(ARGS)}' \
 
